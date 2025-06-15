@@ -10,8 +10,9 @@ exports.login = async (req, res) => {
   if (!validator.isEmail(email)) {
     return res.status(400).json({ message: 'Email không hợp lệ' });
   }
-
+  //console.log('Email nhận được:', req.body.email);
   const user = await User.findOne({ email });
+  // console.log('User tìm được:', user);
   if (!user) return res.status(400).json({ message: 'Email không tồn tại' });
   if (!user.isVerified) return res.status(400).json({ message: 'Tài khoản chưa xác thực email' });
   if (!user.isActive) return res.status(400).json({ message: 'Tài khoản đã bị khóa' });
