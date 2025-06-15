@@ -12,7 +12,7 @@ const riskSourceSchema = new mongoose.Schema({
   },
   name: { type: String, required: true },
   description: { type: String },
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false }
 });
 
 module.exports = mongoose.model('RiskSource', riskSourceSchema);
