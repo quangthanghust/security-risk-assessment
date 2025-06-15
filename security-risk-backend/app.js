@@ -13,8 +13,15 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
-app.use(cors());
+const allowedOrigins = [
+  'https://security-risk-assessment.vercel.app', // domain frontend trên Vercel
+  'http://localhost:3000' // cho phép cả local để dev
+];
 
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true, // dùng cookie hoặc xác thực
+}));
 const seedRiskAcceptanceCriteria = require('./utils/seedRiskAcceptanceCriteria');
 seedRiskAcceptanceCriteria();
 
@@ -24,7 +31,7 @@ seedRiskSource();
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
 
-const userRoutes = require('./routes/userRoutes'); 
+const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
 
 const systemProfileRoutes = require('./routes/systemProfileRoutes');
@@ -100,8 +107,8 @@ WeightConfig.findOne().then(config => {
 
 // Xử lý lỗi 404
 app.use((req, res) => {
-    res.status(404).json({ message: 'Not found' });
-  });
+  res.status(404).json({ message: 'Not found' });
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;
