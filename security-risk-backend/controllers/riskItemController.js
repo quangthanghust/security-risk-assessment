@@ -50,7 +50,8 @@ const generateRiskItems = async (req, res) => {
     );
     res.json({ message: 'Đánh giá rủi ro thành công!' });
   } catch (err) {
-    console.error('Lỗi generateRiskItems:', err); // Thêm dòng này để log lỗi
+    // Log lỗi
+    console.error('Lỗi generateRiskItems:', err);
     res.status(500).json({ message: err.message });
   }
 };
