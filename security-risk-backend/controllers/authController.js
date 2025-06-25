@@ -3,16 +3,14 @@ const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const sendMail = require('../utils/sendMail');
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto'); // Bổ sung
+const crypto = require('crypto');
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   if (!validator.isEmail(email)) {
     return res.status(400).json({ message: 'Email không hợp lệ' });
   }
-  //console.log('Email nhận được:', req.body.email);
   const user = await User.findOne({ email });
-  // console.log('User tìm được:', user);
   if (!user) return res.status(400).json({ message: 'Email không tồn tại' });
   if (!user.isVerified) return res.status(400).json({ message: 'Tài khoản chưa xác thực email' });
   if (!user.isActive) return res.status(400).json({ message: 'Tài khoản đã bị khóa' });
@@ -71,7 +69,7 @@ exports.verifyEmail = async (req, res) => {
   user.verificationToken = undefined;
   await user.save();
 
-  // Tạo JWT token đăng nhập luôn
+  // Tạo JWT token đăng nhập 
   const jwtToken = require('jsonwebtoken').sign(
     { userId: user._id, role: user.role },
     process.env.JWT_SECRET,
@@ -101,7 +99,8 @@ exports.forgotPassword = async (req, res) => {
 
   const resetToken = crypto.randomBytes(32).toString('hex');
   user.resetPasswordToken = resetToken;
-  user.resetPasswordExpires = Date.now() + 3600000; // 1 giờ
+  // Hạn sử dụng token là 1 giờ
+  user.resetPasswordExpires = Date.now() + 3600000;
   await user.save();
 
   // Chỉ gửi 1 email reset (gửi link)
