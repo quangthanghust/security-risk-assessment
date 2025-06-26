@@ -68,15 +68,6 @@ export default function ThreatPage() {
     }));
   };
 
-  // Khi nhập mô tả tự do (Khác)
-  const handleCustomDescChange = e => {
-    setForm(f => ({
-      ...f,
-      code: 'OTHER',
-      description: e.target.value
-    }));
-  };
-
   const handleLevelChange = e => setForm(f => ({ ...f, threatLevel: e.target.value }));
 
   const handleSubmit = async e => {
@@ -192,13 +183,22 @@ export default function ThreatPage() {
                 ))}
               </select>
             ) : (
-              <input
-                value={form.description}
-                onChange={handleCustomDescChange}
-                placeholder="Nhập mô tả mối đe dọa"
-                style={inputStyle}
-                required
-              />
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input
+                  value={form.code}
+                  onChange={e => setForm(f => ({ ...f, code: e.target.value }))}
+                  placeholder="Nhập mã (ví dụ: TE05)"
+                  style={{ ...inputStyle, width: 100 }}
+                  required
+                />
+                <input
+                  value={form.description}
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Nhập mô tả mối đe dọa"
+                  style={inputStyle}
+                  required
+                />
+              </div>
             )}
           </div>
           <div>

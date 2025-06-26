@@ -77,7 +77,7 @@ export default function Sidebar() {
           letterSpacing: 1,
           textShadow: '0 2px 8px #0002'
         }}>
-          Hệ thống đánh giá rủi ro
+          Hệ thống hỗ trợ đánh giá rủi ro
         </div>
       </div>
       <nav style={{ flex: 1 }}>

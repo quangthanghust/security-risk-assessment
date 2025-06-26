@@ -5,6 +5,15 @@ const sendMail = require('../utils/sendMail');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
+function validatePassword(password) {
+  if (password.length < 8) return 'Mật khẩu phải dài ít nhất 8 ký tự.';
+  if (!/[a-z]/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 chữ cái thường.';
+  if (!/[A-Z]/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 chữ cái in hoa.';
+  if (!/[0-9]/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 chữ số.';
+  if (!/[^A-Za-z0-9]/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt.';
+  return '';
+}
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   if (!validator.isEmail(email)) {
@@ -21,8 +30,9 @@ exports.login = async (req, res) => {
   const token = jwt.sign(
     { userId: user._id, role: user.role },
     process.env.JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '5d' }
   );
+
 
   user.lastLogin = new Date();
   await user.save();
@@ -45,6 +55,8 @@ exports.register = async (req, res) => {
   if (!validator.isEmail(email)) {
     return res.status(400).json({ message: 'Email không hợp lệ' });
   }
+  const pwErr = validatePassword(password);
+  if (pwErr) return res.status(400).json({ message: pwErr });
   const existingEmail = await User.findOne({ email: { $regex: new RegExp('^' + email + '$', 'i') } });
   if (existingEmail) return res.status(400).json({ message: 'Email đã tồn tại' });
 
@@ -73,7 +85,7 @@ exports.verifyEmail = async (req, res) => {
   const jwtToken = require('jsonwebtoken').sign(
     { userId: user._id, role: user.role },
     process.env.JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '5d' }
   );
 
   res.json({
@@ -113,6 +125,8 @@ exports.forgotPassword = async (req, res) => {
 // Đặt lại mật khẩu
 exports.resetPassword = async (req, res) => {
   const { email, token, newPassword } = req.body;
+  const pwErr = validatePassword(newPassword);
+  if (pwErr) return res.status(400).json({ message: pwErr });
   const user = await User.findOne({
     email,
     resetPasswordToken: token,

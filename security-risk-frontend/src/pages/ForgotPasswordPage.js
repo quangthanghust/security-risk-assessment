@@ -7,11 +7,17 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [err, setErr] = useState('');
+  const [fieldErr, setFieldErr] = useState({});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErr('');
     setMessage('');
+    const errors = {};
+    if (!email) errors.email = 'Email không được để trống';
+    else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/.test(email)) errors.email = 'Email không hợp lệ';
+    setFieldErr(errors);
+    if (Object.keys(errors).length > 0) return;
     try {
       const res = await api.post('/auth/forgot-password', { email });
       setMessage(res.data.message || 'Vui lòng kiểm tra email để đặt lại mật khẩu!');
@@ -121,8 +127,12 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                style={inputStyle}
+                style={{
+                  ...inputStyle,
+                  border: fieldErr.email ? '1.5px solid #ff4d4f' : inputStyle.border
+                }}
               />
+              {fieldErr.email && <div style={{ color: 'red', marginBottom: 8 }}>{fieldErr.email}</div>}
               {err && <div style={{ color: 'red', marginBottom: 8 }}>{err}</div>}
               {message && <div style={{ color: 'green', marginBottom: 8 }}>{message}</div>}
               <button

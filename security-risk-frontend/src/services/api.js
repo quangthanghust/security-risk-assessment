@@ -12,4 +12,17 @@ api.interceptors.request.use(config => {
   return config;
 });
 
+// Tự động logout khi token hết hạn và chuyển hướng về trang đăng nhập
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

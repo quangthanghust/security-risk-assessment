@@ -12,11 +12,24 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const validatePassword = (password) => {
+    if (password.length < 8) return 'Mật khẩu phải dài ít nhất 8 ký tự.';
+    if (!/[a-z]/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 chữ cái thường.';
+    if (!/[A-Z]/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 chữ cái in hoa.';
+    if (!/[0-9]/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 chữ số.';
+    if (!/[^A-Za-z0-9]/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt.';
+    return '';
+  };
+
   const validate = () => {
     const errors = {};
     if (!email) errors.email = 'Email không được để trống';
     else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/.test(email)) errors.email = 'Email không hợp lệ';
     if (!password) errors.password = 'Mật khẩu không được để trống';
+    else {
+      const pwErr = validatePassword(password);
+      if (pwErr) errors.password = pwErr;
+    }
     return errors;
   };
 

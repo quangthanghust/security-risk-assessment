@@ -20,7 +20,7 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: allowedOrigins,
-  credentials: true, // dùng cookie hoặc xác thực
+  credentials: true, // dùng xác thực
 }));
 const seedRiskAcceptanceCriteria = require('./utils/seedRiskAcceptanceCriteria');
 seedRiskAcceptanceCriteria();
@@ -58,20 +58,11 @@ app.use('/api/strategic-scenarios', strategicScenarioRoutes);
 const operationScenarioRoutes = require('./routes/operationScenarioRoutes');
 app.use('/api/operation-scenarios', operationScenarioRoutes);
 
-const riskScenarioRoutes = require('./routes/riskScenarioRoutes');
-app.use('/api/risk-scenarios', riskScenarioRoutes);
-
-const riskAssessmentRoutes = require('./routes/riskAssessmentRoutes');
-app.use('/api/risk-assessments', riskAssessmentRoutes);
-
 const riskItemRoutes = require('./routes/riskItemRoutes');
 app.use('/api/risk-items', riskItemRoutes);
 
 const riskAcceptanceCriteriaRoutes = require('./routes/riskAcceptanceCriteriaRoutes');
 app.use('/api/risk-acceptance-criteria', riskAcceptanceCriteriaRoutes);
-
-const recommendationRoutes = require('./routes/recommendationRoutes');
-app.use('/api/recommendations', recommendationRoutes);
 
 const weightConfigRoutes = require('./routes/weightConfigRoutes');
 app.use('/api/weight-configs', weightConfigRoutes);

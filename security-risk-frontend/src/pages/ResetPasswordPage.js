@@ -16,15 +16,29 @@ export default function ResetPasswordPage() {
   const [message, setMessage] = useState('');
   const [err, setErr] = useState('');
   const navigate = useNavigate();
+  const [fieldErr, setFieldErr] = useState({});
+
+  const validatePassword = (password) => {
+    if (password.length < 8) return 'Mật khẩu phải dài ít nhất 8 ký tự.';
+    if (!/[a-z]/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 chữ cái thường.';
+    if (!/[A-Z]/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 chữ cái in hoa.';
+    if (!/[0-9]/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 chữ số.';
+    if (!/[^A-Za-z0-9]/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt.';
+    return '';
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErr('');
     setMessage('');
-    if (newPassword !== confirm) {
-      setErr('Mật khẩu nhập lại không khớp');
-      return;
-    }
+    const errors = {};
+    const pwErr = validatePassword(newPassword);
+    if (pwErr) errors.newPassword = pwErr;
+    if (!confirm) errors.confirm = 'Vui lòng nhập lại mật khẩu';
+    else if (newPassword !== confirm) errors.confirm = 'Mật khẩu nhập lại không khớp';
+    setFieldErr(errors);
+    if (Object.keys(errors).length > 0) return;
     try {
       const res = await api.post('/auth/reset-password', { email, token, newPassword });
       setMessage(res.data.message || 'Đặt lại mật khẩu thành công!');
@@ -135,17 +149,25 @@ export default function ResetPasswordPage() {
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
                 required
-                style={inputStyle}
+                style={{
+                  ...inputStyle,
+                  border: fieldErr.newPassword ? '1.5px solid #ff4d4f' : inputStyle.border
+                }}
               />
-              <label style={{ fontWeight: 500, marginBottom: 4, display: 'block', marginTop: 8 }}>Xác nhận mật khẩu</label>
+              {fieldErr.newPassword && <div style={{ color: 'red', marginBottom: 8 }}>{fieldErr.newPassword}</div>}
+
               <input
                 type="password"
                 placeholder="Xác nhận mật khẩu"
                 value={confirm}
                 onChange={e => setConfirm(e.target.value)}
                 required
-                style={inputStyle}
+                style={{
+                  ...inputStyle,
+                  border: fieldErr.confirm ? '1.5px solid #ff4d4f' : inputStyle.border
+                }}
               />
+              {fieldErr.confirm && <div style={{ color: 'red', marginBottom: 8 }}>{fieldErr.confirm}</div>}
               {err && <div style={{ color: 'red', marginBottom: 8 }}>{err}</div>}
               {message && <div style={{ color: 'green', marginBottom: 8 }}>{message}</div>}
               <button

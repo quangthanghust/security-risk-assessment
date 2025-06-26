@@ -4,12 +4,29 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#d7263d', '#6c3483', '#229954'];
 
+// Ánh xạ loại tài sản sang tiếng Việt
+const ASSET_TYPE_LABELS = {
+  Information: 'Thông tin',
+  Hardware: 'Phần cứng',
+  Software: 'Phần mềm',
+  Personnel: 'Nhân sự',
+  Site: 'Địa điểm',
+  Service: 'Dịch vụ',
+  Other: 'Khác'
+};
+
 export default function StatisticPage() {
   const [overview, setOverview] = useState(null);
   const [riskLevels, setRiskLevels] = useState([]);
   const [assetTypes, setAssetTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
+
+  // Chuyển đổi loại tài sản sang tiếng Việt
+  const assetTypesVN = assetTypes.map(item => ({
+    ...item,
+    type: ASSET_TYPE_LABELS[item.type] || item.type
+  }));
 
   useEffect(() => {
     setLoading(true);
@@ -84,7 +101,7 @@ export default function StatisticPage() {
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
-                    data={assetTypes}
+                    data={assetTypesVN}
                     dataKey="count"
                     nameKey="type"
                     cx="50%"
@@ -92,7 +109,7 @@ export default function StatisticPage() {
                     outerRadius={80}
                     label
                   >
-                    {assetTypes.map((entry, index) => (
+                    {assetTypesVN.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>

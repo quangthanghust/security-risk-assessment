@@ -12,6 +12,8 @@ export default function HistoryPage() {
     const [riskItems, setRiskItems] = useState([]);
     const [assets, setAssets] = useState([]);
     const [riskLevelTrend, setRiskLevelTrend] = useState([]);
+    const [groupBy, setGroupBy] = useState('all'); // 'tất cả', 'theo tuần'
+    const [selectedWeek, setSelectedWeek] = useState('');
 
     useEffect(() => {
         getAssets().then(res => setAssets(res.data));
@@ -27,6 +29,27 @@ export default function HistoryPage() {
             getRiskItemsBySession(selectedSession).then(res => setRiskItems(res.data));
         }
     }, [selectedSession]);
+
+    // Lấy danh sách tuần có trong dữ liệu
+    const weekList = [...new Set(riskLevelTrend.map(item =>
+        moment(item.createdAt).startOf('isoWeek').format('YYYY-[W]WW')))];
+
+    // Lọc dữ liệu theo tuần đã chọn, hiển thị từng ngày trong tuần đó
+    function filterBySelectedWeek(data, week) {
+        if (!week) return [];
+        return data
+            .filter(item =>
+                moment(item.createdAt).startOf('isoWeek').format('YYYY-[W]WW') === week)
+            .map(item => ({
+                ...item,
+                createdAt: moment(item.createdAt).format('DD/MM HH:mm')
+            }));
+    }
+
+    // Dữ liệu truyền vào BarChart
+    const chartData = groupBy === 'week'
+        ? filterBySelectedWeek(riskLevelTrend, selectedWeek)
+        : riskLevelTrend;
 
     return (
         <div
@@ -111,20 +134,46 @@ export default function HistoryPage() {
             </div>
 
             <h3 style={{ margin: '32px 32px 16px 32px' }}>Biến động mức độ rủi ro theo từng phiên đánh giá</h3>
+
             <div style={{
                 background: '#f7fafd',
                 borderRadius: 8,
                 padding: 16,
                 marginBottom: 8
             }}>
+
+                <div style={{ marginBottom: 8 }}>
+                    <label style={{ fontWeight: 500, marginRight: 8 }}>Xem theo:</label>
+                    <select value={groupBy} onChange={e => { setGroupBy(e.target.value); setSelectedWeek(''); }} style={{ padding: 6, borderRadius: 6 }}>
+                        <option value="all">Tất cả</option>
+                        <option value="week">Tuần</option>
+                    </select>
+                    {groupBy === 'week' && (
+                        <select value={selectedWeek} onChange={e => setSelectedWeek(e.target.value)} style={{ marginLeft: 8, padding: 6, borderRadius: 6 }}>
+                            <option value="">Chọn tuần</option>
+                            {weekList.map(week => (
+                                <option key={week} value={week}>{week}</option>
+                            ))}
+                        </select>
+                    )}
+                </div>
+
                 <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={riskLevelTrend}>
+                    <BarChart data={chartData}>
                         <XAxis
                             dataKey="createdAt"
-                            tickFormatter={v => moment(v).tz('Asia/Ho_Chi_Minh').format('DD/MM HH:mm')}
+                            tickFormatter={v =>
+                                groupBy === 'week'
+                                    ? v
+                                    : moment(v).tz('Asia/Ho_Chi_Minh').format('DD/MM HH:mm')
+                            }
                         />
                         <YAxis allowDecimals={false} />
-                        <Tooltip labelFormatter={v => moment(v).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')} />
+                        <Tooltip labelFormatter={v =>
+                            groupBy === 'week'
+                                ? v
+                                : moment(v).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
+                        } />
                         <Legend />
                         <Bar dataKey="Rất thấp" stackId="a" fill="#b7eb8f" barSize={18} />
                         <Bar dataKey="Thấp" stackId="a" fill="#52c41a" barSize={18} />
