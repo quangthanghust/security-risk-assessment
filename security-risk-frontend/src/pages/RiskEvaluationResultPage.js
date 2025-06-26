@@ -211,7 +211,7 @@ export default function RiskEvaluationResultPage() {
       </div>
 
       <div style={{ margin: '0 32px 16px 32px' }}>
-        <h3>Thông tin liên quan</h3>
+        <h3>Danh sách kịch bản rủi ro</h3>
         <div style={{ overflowX: 'auto', marginBottom: 24 }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
             <thead>
