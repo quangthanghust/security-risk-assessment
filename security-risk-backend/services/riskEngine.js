@@ -12,8 +12,6 @@ const calculateConsequence = async (strategicScenarioId, weightConfig) => {
   if (!scenario) {
     return 1;
   }
-  console.log('SCENARIO:', scenario);
-  console.log('ASSET:', scenario.asset);
   const asset = scenario.asset;
   const w = weightConfig?.consequenceWeights || {};
 
@@ -24,7 +22,7 @@ const calculateConsequence = async (strategicScenarioId, weightConfig) => {
   const dependency = asset?.dependency || 1;
   const lossMagnitude = asset?.lossMagnitude || 1;
 
-  // Thêm log để kiểm tra
+  /* Thêm log để kiểm tra
   console.log('TÍNH HẬU QUẢ:', {
     assetValue,
     impactTypeLevel,
@@ -33,7 +31,7 @@ const calculateConsequence = async (strategicScenarioId, weightConfig) => {
     lossMagnitude,
     w,
     score
-  });
+  }); */
 
   const score = (
     assetValue * (w.assetValue || 0) +
