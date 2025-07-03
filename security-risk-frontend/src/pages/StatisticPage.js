@@ -92,7 +92,20 @@ export default function StatisticPage() {
                   <XAxis dataKey="level" />
                   <YAxis allowDecimals={false} />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#0088FE" />
+                  <Bar dataKey="count">
+                    {riskLevels.map((entry, idx) => (
+                      <Cell
+                        key={`cell-${idx}`}
+                        fill={
+                          entry.level === 'Rất cao' ? '#ff4d4f' :
+                            entry.level === 'Cao' ? '#faad14' :
+                              entry.level === 'Trung bình' ? '#fadb14' :
+                                entry.level === 'Thấp' ? '#52c41a' :
+                                  '#b7eb8f'
+                        }
+                      />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>

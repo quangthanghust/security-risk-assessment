@@ -10,13 +10,22 @@ const WeightConfig = require('../models/WeightConfig');
 const mongoose = require('mongoose');
 
 async function generateRiskItemsForReport(reportId, riskAcceptanceCriteriaId, userId) {
+  console.log('==> ĐÃ VÀO generateRiskItemsForReport', { reportId, riskAcceptanceCriteriaId, userId });
   const weightConfig = await WeightConfig.findOne().sort({ updatedAt: -1 }); // Thêm dòng này
   // Lấy các operationScenario (mỗi cái đã liên kết asset, threat, vulnerability, strategicScenario)
   const userObjectId = new mongoose.Types.ObjectId(userId);
   const sessionId = new Date().toISOString(); // Tạo sessionId mới
-  const operationScenarios = await OperationScenario.find({ createdBy: userObjectId }).populate('asset threat vulnerability strategicScenarioId');
+  const operationScenarios = await OperationScenario.find({ createdBy: userObjectId })
+    .populate({
+      path: 'asset',
+      populate: { path: 'owner' }
+    })
+    .populate({
+      path: 'strategicScenarioId',
+      populate: { path: 'asset', populate: { path: 'owner' } }
+    })
+    .populate('threat vulnerability');
   const criteria = await RiskAcceptanceCriteria.findById(riskAcceptanceCriteriaId);
-
 
   for (const op of operationScenarios) {
     try {
@@ -47,7 +56,8 @@ async function generateRiskItemsForReport(reportId, riskAcceptanceCriteriaId, us
         riskLevel,
         criteria._id
       );
-      const riskDescription = `${op.asset?.name || 'Tài sản'} có nguy cơ bị ${op.threat?.description || 'mối đe dọa'} qua ${op.vulnerability?.description || 'lỗ hổng'} trong kịch bản "${op.name}"`;
+      const assetName = op.strategicScenarioId?.asset?.name || op.asset?.name || 'Tài sản';
+      const riskDescription = `${assetName} có nguy cơ bị ${op.threat?.description || 'mối đe dọa'} qua ${op.vulnerability?.description || 'lỗ hổng'} trong kịch bản "${op.name}"`;
 
       await RiskItem.create({
         riskDescription,
@@ -56,10 +66,10 @@ async function generateRiskItemsForReport(reportId, riskAcceptanceCriteriaId, us
         riskLevel,
         evaluationResult,
         treatmentRecommendation,
-        responsiblePerson: op.asset.owner ? op.asset.owner.toString() : '',
+        responsiblePerson: op.strategicScenarioId?.asset?.owner ? op.strategicScenarioId.asset.owner.toString() : '',
 
         // BỔ SUNG LIÊN KẾT
-        asset: op.asset._id,
+        asset: op.strategicScenarioId?.asset?._id || op.asset._id,
         threat: op.threat._id,
         vulnerability: op.vulnerability._id,
         strategicScenario: op.strategicScenarioId._id,

@@ -8,8 +8,12 @@ const RiskAcceptanceCriteria = require('../models/RiskAcceptanceCriteria');
 
 // Tính consequence: đồng bộ trường với Asset
 const calculateConsequence = async (strategicScenarioId, weightConfig) => {
-  const scenario = await StrategicScenario.findById(strategicScenarioId).populate('asset');
-  if (!scenario) return 1;
+  let scenario = await StrategicScenario.findOne({ _id: strategicScenarioId }).populate('asset');
+  if (!scenario) {
+    return 1;
+  }
+  console.log('SCENARIO:', scenario);
+  console.log('ASSET:', scenario.asset);
   const asset = scenario.asset;
   const w = weightConfig?.consequenceWeights || {};
 
@@ -19,6 +23,17 @@ const calculateConsequence = async (strategicScenarioId, weightConfig) => {
   const interestedPartiesLevel = scenario.interestedPartiesLevel || 1; // Lấy từ StrategicScenario
   const dependency = asset?.dependency || 1;
   const lossMagnitude = asset?.lossMagnitude || 1;
+
+  // Thêm log để kiểm tra
+  console.log('TÍNH HẬU QUẢ:', {
+    assetValue,
+    impactTypeLevel,
+    interestedPartiesLevel,
+    dependency,
+    lossMagnitude,
+    w,
+    score
+  });
 
   const score = (
     assetValue * (w.assetValue || 0) +

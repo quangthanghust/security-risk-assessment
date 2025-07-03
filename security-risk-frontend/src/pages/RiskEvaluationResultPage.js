@@ -61,9 +61,31 @@ export default function RiskEvaluationResultPage() {
     setEditWeights(w => ({ ...w, [key]: Number(value) }));
   };
 
+  const consequenceSum =
+    (editWeights?.assetValue || 0) +
+    (editWeights?.impactTypeLevel || 0) +
+    (editWeights?.interestedPartiesLevel || 0) +
+    (editWeights?.dependency || 0) +
+    (editWeights?.lossMagnitude || 0);
+
+  const likelihoodSum =
+    (editWeights?.vulnerabilityLevel || 0) +
+    (editWeights?.threatLevel || 0) +
+    (editWeights?.controlEffectiveness || 0) +
+    (editWeights?.exposureFrequency || 0) +
+    (editWeights?.detectability || 0);
+
+  const isWeightValid =
+    Math.abs(consequenceSum - 1) < 0.0001 &&
+    Math.abs(likelihoodSum - 1) < 0.0001;
+
   const handleSave = async () => {
-    setSaving(true);
     setMsg('');
+    if (!isWeightValid) {
+      setMsg('Tổng các trọng số của hậu quả và khả năng xảy ra phải bằng 1.');
+      return;
+    }
+    setSaving(true);
     try {
       await updateWeightConfig(weightConfig._id, {
         consequenceWeights: {
@@ -189,11 +211,13 @@ export default function RiskEvaluationResultPage() {
       <div style={{ margin: '0 32px 16px 32px' }}>
         <h3>Ma trận rủi ro (Risk Matrix)</h3>
         <div style={{ display: 'flex', justifyContent: 'center', margin: '24px 0' }}>
-          <table border="1" style={{ textAlign: 'center', borderCollapse: 'collapse', background: '#fff' }}>
+          <table border="1" style={{ textAlign: 'center', borderCollapse: 'collapse', background: '#fff', minWidth: 700 }}>
             <thead>
               <tr>
-                <th>Khả năng xảy ra \ Hậu quả</th>
-                {CONSEQUENCE_LABELS.map(label => <th key={label}>{label}</th>)}
+                <th style={{ minWidth: 140, padding: '8px 12px' }}>Khả năng xảy ra \ Hậu quả</th>
+                {CONSEQUENCE_LABELS.map(label => (
+                  <th key={label} style={{ minWidth: 100, padding: '8px 12px' }}>{label}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -201,7 +225,15 @@ export default function RiskEvaluationResultPage() {
                 <tr key={i}>
                   <td><b>{LIKELIHOOD_LABELS[i]}</b></td>
                   {row.map((cell, j) => (
-                    <td key={j} style={{ background: riskLevelColor(cell), minWidth: 80 }}>{cell}</td>
+                    <td key={j} style={{
+                      background: riskLevelColor(cell),
+                      minWidth: 100,
+                      padding: '8px 12px',
+                      fontWeight: 500,
+                    }}
+                    >
+                      {cell}
+                    </td>
                   ))}
                 </tr>
               ))}
@@ -237,8 +269,8 @@ export default function RiskEvaluationResultPage() {
             <tbody>
               {operationScenarios.flatMap(os => {
                 // Lấy asset, strategicScenario, threat, vulnerability liên quan
-                const asset = assets.find(a => a._id === (os.asset?._id || os.asset));
                 const ss = strategicScenarios.find(s => (s._id === (os.strategicScenarioId?._id || os.strategicScenarioId)));
+                const asset = ss ? assets.find(a => a._id === (ss.asset?._id || ss.asset)) : null;
                 const threat = os.threat ? threats.find(t => t._id === (os.threat._id || os.threat)) : null;
                 const vulnerability = os.vulnerability ? vulnerabilities.find(v => v._id === (os.vulnerability._id || os.vulnerability)) : null;
 
@@ -300,17 +332,16 @@ export default function RiskEvaluationResultPage() {
             </thead>
             <tbody>
               {riskItems.map(item => {
-                const asset = assets.find(a => a._id === (item.asset?._id || item.asset));
+                const ss = strategicScenarios.find(s => s._id === (item.strategicScenario?._id || item.strategicScenario));
+                const asset = ss
+                  ? assets.find(a => a._id === (ss.asset?._id || ss.asset))
+                  : assets.find(a => a._id === (item.asset?._id || item.asset));
                 const system = asset && asset.system ? asset.system.name : '';
                 const manager = asset && asset.system && asset.system.manager ? asset.system.manager : '';
                 return (
                   <tr key={item._id}>
                     <td style={{ padding: 8 }}>
                       {item.riskDescription}
-                      <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>
-                        (Hệ thống: {system})
-                      </span>
                     </td>
                     <td style={{ padding: 8 }}>{system}</td>
                     <td style={{ padding: 8 }}>{item.consequence}</td>
@@ -325,7 +356,7 @@ export default function RiskEvaluationResultPage() {
                         : ''}
                     </td>
                   </tr>
-                )
+                );
               })}
             </tbody>
           </table>

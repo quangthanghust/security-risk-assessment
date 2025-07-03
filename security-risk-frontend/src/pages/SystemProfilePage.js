@@ -5,6 +5,7 @@ import {
   updateSystemProfile,
   deleteSystemProfile
 } from '../services/systemProfileService';
+import moment from 'moment-timezone';
 
 const CRITICALITY_OPTIONS = ['Rất quan trọng', 'Quan trọng', 'Bình thường'];
 
@@ -230,6 +231,7 @@ export default function SystemProfilePage() {
                 <th>Phạm vi</th>
                 <th>Mức độ quan trọng</th>
                 <th>Mô tả</th>
+                <th>Thời gian tạo</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
@@ -244,6 +246,11 @@ export default function SystemProfilePage() {
                   <td>{p.scope}</td>
                   <td>{p.criticality}</td>
                   <td>{p.description}</td>
+                  <td>
+                    {p.createdAt
+                      ? moment(p.createdAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
+                      : ''}
+                  </td>
                   <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <button
                       onClick={() => handleEdit(p)}

@@ -8,6 +8,8 @@ const interestedPartySchema = new mongoose.Schema({
   phone: String,
   type: { type: String },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+}, {
+  timestamps: true // Tự động thêm trường createdAt và updatedAt
 });
 
 module.exports = mongoose.model('InterestedParty', interestedPartySchema);

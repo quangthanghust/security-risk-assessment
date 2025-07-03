@@ -36,7 +36,12 @@ const updateOperationScenario = async (id, data) => {
   if (data.asset && !isValidObjectId(data.asset)) throw new Error('Invalid assetId');
   if (data.threat && !isValidObjectId(data.threat)) throw new Error('Invalid threatId');
   if (data.vulnerability && !isValidObjectId(data.vulnerability)) throw new Error('Invalid vulnerabilityId');
-  return OperationScenario.findByIdAndUpdate(id, data, { new: true });
+  return OperationScenario.findByIdAndUpdate(id, data, { new: true })
+    .populate('strategicScenarioId')
+    .populate('asset')
+    .populate('threat')
+    .populate('vulnerability')
+    .populate('createdBy');
 };
 
 const deleteOperationScenario = async (id) => {

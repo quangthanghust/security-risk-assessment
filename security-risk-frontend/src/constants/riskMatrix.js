@@ -6,16 +6,16 @@ export const RISK_MATRIX = [
   ['Thấp', 'Thấp', 'Thấp', 'Rất thấp', 'Rất thấp']
 ];
 export const LIKELIHOOD_LABELS = [
-  'Gần như chắc chắn',
-  'Rất có thể',
-  'Có thể',
-  'Khó xảy ra',
-  'Hiếm khi'
+  '5 - Gần như chắc chắn',
+  '4 - Rất có thể',
+  '3 - Có thể',
+  '2 - Khó xảy ra',
+  '1 - Hiếm khi'
 ];
 export const CONSEQUENCE_LABELS = [
-  'Thảm họa',
-  'Nghiêm trọng',
-  'Đáng kể',
-  'Trung bình',
-  'Nhẹ'
+  '5 - Thảm họa',
+  '4 - Nghiêm trọng',
+  '3 - Đáng kể',
+  '2 - Trung bình',
+  '1 - Nhẹ'
 ];

@@ -12,6 +12,8 @@ const operationScenarioSchema = new mongoose.Schema({
   exposureFrequency: { type: Number, min: 1, max: 5 }, // Tần suất tiếp xúc (1-5)
   likelihoodLevel: { type: Number, min: 1, max: 5 }, // Kết quả tính toán, không nhập tay
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+}, {
+  timestamps: true // Tự động thêm trường createdAt và updatedAt
 });
 
 module.exports = mongoose.model('OperationScenario', operationScenarioSchema);

@@ -13,6 +13,8 @@ const assetSchema = new mongoose.Schema({
   lossMagnitude: { type: Number, min: 1, max: 5 }, // Mức độ tổn thất (1-5)
   dependency: { type: Number, min: 1, max: 5 }, // Mức độ phụ thuộc (1-5)
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+}, {
+  timestamps: true // Tự động thêm trường createdAt và updatedAt
 });
 
 module.exports = mongoose.model('Asset', assetSchema);

@@ -6,6 +6,7 @@ import { getThreats } from '../services/threatService';
 import { getVulnerabilities } from '../services/vulnerabilityService';
 
 
+
 const inputStyle = {
   borderRadius: 8,
   border: '1px solid #e0e0e0',
@@ -101,11 +102,12 @@ export default function OperationScenarioPage() {
   };
 
   const handleEdit = sc => {
+    const ss = strategicScenarios.find(s => (s._id === (sc.strategicScenarioId?._id || sc.strategicScenarioId)));
     setForm({
       name: sc.name,
       description: sc.description,
       strategicScenarioId: sc.strategicScenarioId?._id || sc.strategicScenarioId || '',
-      asset: sc.asset?._id || sc.asset || '',
+      asset: ss ? (ss.asset?._id || ss.asset) : '',
       threat: sc.threat?._id || sc.threat || '',
       vulnerability: sc.vulnerability?._id || sc.vulnerability || '',
       controlEffectiveness: sc.controlEffectiveness,
@@ -129,6 +131,18 @@ export default function OperationScenarioPage() {
     }
     setLoading(false);
   };
+
+  // Khi chọn strategicScenario, tự động set asset:
+  const handleStrategicScenarioChange = e => {
+    const ssId = e.target.value;
+    const ss = strategicScenarios.find(s => s._id === ssId);
+    setForm(f => ({
+      ...f,
+      strategicScenarioId: ssId,
+      asset: ss ? (ss.asset?._id || ss.asset) : ''
+    }));
+  };
+
 
   // Bước 4: Dropdown liên kết
   return (
@@ -185,14 +199,24 @@ export default function OperationScenarioPage() {
           </div>
           <div>
             <label style={{ fontWeight: 500 }}>Kịch bản chiến lược</label>
-            <select name="strategicScenarioId" value={form.strategicScenarioId} onChange={handleChange} style={inputStyle}>
+            <select
+              name="strategicScenarioId"
+              value={form.strategicScenarioId}
+              onChange={handleStrategicScenarioChange}
+              style={inputStyle}
+            >
               <option value="">--Kịch bản chiến lược--</option>
               {strategicScenarios.map(ss => <option key={ss._id} value={ss._id}>{ss.name}</option>)}
             </select>
           </div>
           <div>
             <label style={{ fontWeight: 500 }}>Tài sản</label>
-            <select name="asset" value={form.asset} onChange={handleChange} style={inputStyle}>
+            <select
+              name="asset"
+              value={form.asset}
+              disabled
+              style={inputStyle}
+            >
               <option value="">--Tài sản--</option>
               {assets.map(a => <option key={a._id} value={a._id}>{a.name}</option>)}
             </select>
@@ -268,7 +292,14 @@ export default function OperationScenarioPage() {
                   <td>{sc.name}</td>
                   <td>{sc.description}</td>
                   <td>{strategicScenarios.find(ss => ss._id === (sc.strategicScenarioId?._id || sc.strategicScenarioId))?.name || ''}</td>
-                  <td>{assets.find(a => a._id === (sc.asset?._id || sc.asset))?.name || ''}</td>
+                  <td>
+                    {assets.find(a =>
+                      a._id === (
+                        (strategicScenarios.find(ss => ss._id === (sc.strategicScenarioId?._id || sc.strategicScenarioId))?.asset?._id)
+                        || (strategicScenarios.find(ss => ss._id === (sc.strategicScenarioId?._id || sc.strategicScenarioId))?.asset)
+                      )
+                    )?.name || ''}
+                  </td>
                   <td>{threats.find(t => t._id === (sc.threat?._id || sc.threat))?.description || ''}</td>
                   <td>{vulnerabilities.find(v => v._id === (sc.vulnerability?._id || sc.vulnerability))?.description || ''}</td>
                   <td>{sc.controlEffectiveness}</td>
