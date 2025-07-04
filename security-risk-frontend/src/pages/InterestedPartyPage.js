@@ -7,7 +7,7 @@ import {
   exportInterestedPartiesExcel,
   importInterestedPartiesExcel
 } from '../services/interestedPartyService';
-
+import moment from 'moment-timezone';
 
 const inputStyle = {
   borderRadius: 8,
@@ -251,6 +251,7 @@ export default function InterestedPartyPage() {
                 <th>Chức vụ</th>
                 <th>Địa chỉ</th>
                 <th>Số điện thoại</th>
+                <th>Thời gian tạo</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
@@ -262,6 +263,11 @@ export default function InterestedPartyPage() {
                   <td>{p.position}</td>
                   <td>{p.address}</td>
                   <td>{p.phone}</td>
+                  <td>
+                    {p.createdAt
+                      ? moment(p.createdAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
+                      : ''}
+                  </td>
                   <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <button onClick={() => handleEdit(p)} style={{ background: '#19c6e6', color: '#fff', padding: '6px 16px', borderRadius: 8, marginRight: 6, minWidth: 56 }}>Sửa</button>
                     <button onClick={() => handleDelete(p._id)} style={{ background: '#ff4d4f', color: '#fff', padding: '6px 16px', borderRadius: 8, minWidth: 56 }}>Xóa</button>

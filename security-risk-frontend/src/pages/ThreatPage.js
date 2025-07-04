@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getThreats, createThreat, updateThreat, deleteThreat, exportThreatsExcel, importThreatsExcel } from '../services/threatService';
 import { THREAT_OPTIONS } from '../constants/threats';
+import moment from 'moment-timezone';
 
 const CATEGORY_OPTIONS = Object.keys(THREAT_OPTIONS);
 
@@ -304,6 +305,7 @@ export default function ThreatPage() {
                 <th>Mã</th>
                 <th>Mô tả</th>
                 <th>Mức độ</th>
+                <th>Thời gian tạo</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
@@ -314,6 +316,11 @@ export default function ThreatPage() {
                   <td>{threat.code}</td>
                   <td>{threat.description}</td>
                   <td>{threat.threatLevel}</td>
+                  <td>
+                    {threat.createdAt
+                      ? moment(threat.createdAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
+                      : ''}
+                  </td>
                   <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <button onClick={() => handleEdit(threat)} style={{ background: '#19c6e6', color: '#fff', padding: '6px 16px', borderRadius: 8, marginRight: 6, minWidth: 56 }}>Sửa</button>
                     <button onClick={() => handleDelete(threat._id)} style={{ background: '#ff4d4f', color: '#fff', padding: '6px 16px', borderRadius: 8, minWidth: 56 }}>Xóa</button>

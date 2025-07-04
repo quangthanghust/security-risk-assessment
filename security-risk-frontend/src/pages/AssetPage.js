@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAssets, createAsset, updateAsset, deleteAsset, exportAssetsExcel, importAssetsExcel } from '../services/assetService';
 import { getSystemProfiles } from '../services/systemProfileService';
+import moment from 'moment-timezone';
 
 const IMPACT_TYPE_OPTIONS = [
   { value: 'Confidentiality', label: 'Bảo mật' },
@@ -384,6 +385,7 @@ export default function AssetPage() {
                 <th>Mức độ phụ thuộc</th>
                 <th>Mức độ tổn thất</th>
                 <th>Hệ thống</th>
+                <th>Thời gian tạo</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
@@ -404,6 +406,11 @@ export default function AssetPage() {
                   <td>{asset.dependency ?? 1}</td>
                   <td>{asset.lossMagnitude ?? 1}</td>
                   <td>{asset.system?.name || ''}</td>
+                  <td>
+                    {asset.createdAt
+                      ? moment(asset.createdAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
+                      : ''}
+                  </td>
                   <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <button
                       onClick={() => handleEdit(asset)}
