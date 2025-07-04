@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getThreats, createThreat, updateThreat, deleteThreat } from '../services/threatService';
+import { getThreats, createThreat, updateThreat, deleteThreat, exportThreatsExcel, importThreatsExcel } from '../services/threatService';
 import { THREAT_OPTIONS } from '../constants/threats';
 
 const CATEGORY_OPTIONS = Object.keys(THREAT_OPTIONS);
@@ -220,6 +220,73 @@ export default function ThreatPage() {
             <button type="button" onClick={fetchThreats} style={{ background: '#19c6e6', color: '#fff', padding: '6px 16px', borderRadius: 8 }}>Làm mới danh sách</button>
           </div>
         </form>
+
+        {/* NÚT EXPORT/IMPORT */}
+        <div style={{
+          display: 'flex',
+          gap: 8,
+          marginBottom: 16,
+          marginLeft: 32,
+          justifyContent: 'flex-end'
+        }}>
+          <button
+            onClick={async () => {
+              try {
+                const res = await exportThreatsExcel();
+                const url = window.URL.createObjectURL(new Blob([res.data]));
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'moi_de_doa.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+              } catch (err) {
+                alert('Xuất Excel thất bại!');
+              }
+            }}
+            style={{
+              background: '#19c6e6',
+              color: '#fff',
+              padding: '6px 16px',
+              borderRadius: 8
+            }}
+          >
+            Xuất Excel
+          </button>
+          <label
+            htmlFor="import-threat-excel"
+            style={{
+              background: '#27ae60',
+              color: '#fff',
+              padding: '6px 16px',
+              borderRadius: 8,
+              cursor: 'pointer',
+              display: 'inline-block'
+            }}
+          >
+            Thêm tệp
+            <input
+              id="import-threat-excel"
+              type="file"
+              accept=".xlsx, .xls"
+              onChange={async e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('file', file);
+                try {
+                  await importThreatsExcel(formData);
+                  alert('Import thành công!');
+                  fetchThreats(); // reload lại danh sách
+                } catch (err) {
+                  alert('Import thất bại!');
+                }
+              }}
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
 
         {/* BẢNG */}
         <div style={{

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAssets, createAsset, updateAsset, deleteAsset } from '../services/assetService';
+import { getAssets, createAsset, updateAsset, deleteAsset, exportAssetsExcel, importAssetsExcel } from '../services/assetService';
 import { getSystemProfiles } from '../services/systemProfileService';
 
 const IMPACT_TYPE_OPTIONS = [
@@ -295,6 +295,73 @@ export default function AssetPage() {
             ))}
           </select>
         </div>
+
+        <div style={{
+          display: 'flex',
+          gap: 8,
+          marginBottom: 16,
+          marginLeft: 32,
+          justifyContent: 'flex-end'
+        }}>
+          <button
+            onClick={async () => {
+              try {
+                const res = await exportAssetsExcel();
+                const url = window.URL.createObjectURL(new Blob([res.data]));
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'tai_san.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+              } catch (err) {
+                alert('Xuất Excel thất bại!');
+              }
+            }}
+            style={{
+              background: '#19c6e6',
+              color: '#fff',
+              padding: '6px 16px',
+              borderRadius: 8
+            }}
+          >
+            Xuất Excel
+          </button>
+          <label
+            htmlFor="import-asset-excel"
+            style={{
+              background: '#27ae60',
+              color: '#fff',
+              padding: '6px 16px',
+              borderRadius: 8,
+              cursor: 'pointer',
+              display: 'inline-block'
+            }}
+          >
+            Thêm tệp
+            <input
+              id="import-asset-excel"
+              type="file"
+              accept=".xlsx, .xls"
+              onChange={async e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('file', file);
+                try {
+                  await importAssetsExcel(formData);
+                  alert('Import thành công!');
+                  fetchAssets(); // reload lại danh sách
+                } catch (err) {
+                  alert('Import thất bại!');
+                }
+              }}
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
+
 
         <div style={{
           margin: '0 32px 32px 32px',

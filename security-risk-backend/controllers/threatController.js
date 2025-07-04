@@ -1,6 +1,9 @@
 const threatService = require('../services/threatService');
 const mongoose = require('mongoose');
 const { isValidThreat } = require('../utils/threatOptions');
+const XLSX = require('xlsx');
+const fs = require('fs');
+const Threat = require('../models/Threat');
 
 const getThreats = async (req, res) => {
   try {
@@ -86,10 +89,65 @@ const deleteThreat = async (req, res) => {
   }
 };
 
+// EXPORT
+const exportExcel = async (req, res) => {
+  try {
+    let filter = {};
+    if (req.user.role !== 'admin') {
+      if (!req.user.userId || !mongoose.Types.ObjectId.isValid(req.user.userId)) {
+        return res.status(400).json({ message: 'ID không hợp lệ' });
+      }
+      filter.createdBy = new mongoose.Types.ObjectId(req.user.userId);
+    }
+    const data = await Threat.find(filter).populate('asset').lean();
+    const rows = data.map(t => ({
+      "Loại": t.category,
+      "Mã": t.code,
+      "Mô tả": t.description,
+      "Mức độ": t.threatLevel,
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Threats');
+    const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+    res.setHeader('Content-Disposition', 'attachment; filename="moi_de_doa.xlsx"');
+    res.type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buf);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// IMPORT
+const importExcel = async (req, res) => {
+  try {
+    const filePath = req.file.path;
+    const workbook = XLSX.readFile(filePath);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet);
+
+    for (const row of rows) {
+      await Threat.create({
+        category: row["Loại"],
+        code: row["Mã"],
+        description: row["Mô tả"],
+        threatLevel: Number(row["Mức độ"]),
+        createdBy: req.user.userId
+      });
+    }
+    fs.unlinkSync(filePath);
+    res.json({ message: 'Import thành công!' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   getThreats,
   getThreatById,
   createThreat,
   updateThreat,
   deleteThreat,
+  exportExcel,
+  importExcel,
 };

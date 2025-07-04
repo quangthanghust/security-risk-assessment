@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { getInterestedParties, createInterestedParty, updateInterestedParty, deleteInterestedParty } from '../services/interestedPartyService';
+import {
+  getInterestedParties,
+  createInterestedParty,
+  updateInterestedParty,
+  deleteInterestedParty,
+  exportInterestedPartiesExcel,
+  importInterestedPartiesExcel
+} from '../services/interestedPartyService';
 
 
 const inputStyle = {
@@ -161,6 +168,73 @@ export default function InterestedPartyPage() {
             <button type="button" onClick={fetchInterestedParties} style={{ background: '#19c6e6', color: '#fff', padding: '6px 16px', borderRadius: 8 }}>Làm mới danh sách</button>
           </div>
         </form>
+
+        <div style={{
+          display: 'flex',
+          gap: 8,
+          marginBottom: 16,
+          marginLeft: 32,
+          justifyContent: 'flex-end'
+        }}>
+          <button
+            onClick={async () => {
+              try {
+                const res = await exportInterestedPartiesExcel();
+                const url = window.URL.createObjectURL(new Blob([res.data]));
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'cac_ben_lien_quan.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+              } catch (err) {
+                alert('Xuất Excel thất bại!');
+              }
+            }}
+            style={{
+              background: '#19c6e6',
+              color: '#fff',
+              padding: '6px 16px',
+              borderRadius: 8
+            }}
+          >
+            Xuất Excel
+          </button>
+          <label
+            htmlFor="import-interested-party-excel"
+            style={{
+              background: '#27ae60',
+              color: '#fff',
+              padding: '6px 16px',
+              borderRadius: 8,
+              cursor: 'pointer',
+              display: 'inline-block'
+            }}
+          >
+            Thêm tệp
+            <input
+              id="import-interested-party-excel"
+              type="file"
+              accept=".xlsx, .xls"
+              onChange={async e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('file', file);
+                try {
+                  await importInterestedPartiesExcel(formData);
+                  alert('Import thành công!');
+                  fetchInterestedParties(); // reload lại danh sách
+                } catch (err) {
+                  alert('Import thất bại!');
+                }
+              }}
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
+
         <div style={{
           margin: '0 32px 32px 32px',
           background: '#fff',
