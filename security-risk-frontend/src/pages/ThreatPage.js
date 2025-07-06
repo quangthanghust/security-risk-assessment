@@ -28,6 +28,7 @@ export default function ThreatPage() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [success, setSuccess] = useState('');
+  const [search, setSearch] = useState('');
 
   const fetchThreats = async () => {
     setLoading(true);
@@ -119,6 +120,16 @@ export default function ThreatPage() {
   };
 
   const isOther = form.category === 'Khác';
+
+  const filteredThreats = threats.filter(threat => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return true;
+    return (
+      threat.category?.toLowerCase().includes(keyword) ||
+      threat.code?.toLowerCase().includes(keyword) ||
+      threat.description?.toLowerCase().includes(keyword)
+    );
+  });
 
   return (
     <div
@@ -222,6 +233,29 @@ export default function ThreatPage() {
           </div>
         </form>
 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          margin: '0 32px 12px 32px',
+          justifyContent: 'flex-start'
+        }}>
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo loại, mã, mô tả..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              width: 320,
+              padding: '8px 14px',
+              borderRadius: 8,
+              border: '1px solid #e0e0e0',
+              fontSize: 15,
+              background: '#f7fafd'
+            }}
+          />
+        </div>
+
+
         {/* NÚT EXPORT/IMPORT */}
         <div style={{
           display: 'flex',
@@ -310,16 +344,19 @@ export default function ThreatPage() {
               </tr>
             </thead>
             <tbody>
-              {threats.map(threat => (
+              {filteredThreats.map(threat => (
                 <tr key={threat._id}>
                   <td>{threat.category}</td>
                   <td>{threat.code}</td>
                   <td>{threat.description}</td>
                   <td>{threat.threatLevel}</td>
                   <td>
-                    {threat.createdAt
-                      ? moment(threat.createdAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
-                      : ''}
+                    {threat.updatedAt
+                      ? moment(threat.updatedAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
+                      : (threat.createdAt
+                        ? moment(threat.createdAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
+                        : '')
+                    }
                   </td>
                   <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <button onClick={() => handleEdit(threat)} style={{ background: '#19c6e6', color: '#fff', padding: '6px 16px', borderRadius: 8, marginRight: 6, minWidth: 56 }}>Sửa</button>

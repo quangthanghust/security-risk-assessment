@@ -41,10 +41,26 @@ export default function AssetPage() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [success, setSuccess] = useState('');
+  const [search, setSearch] = useState('');
 
-  const filteredAssets = systemFilter === 'all'
-    ? assets
-    : assets.filter(asset => asset.system && asset.system._id === systemFilter);
+  const filteredAssets = assets
+    .filter(asset => {
+      // Lọc theo hệ thống
+      if (systemFilter === 'all') return true;
+      return asset.system && asset.system._id === systemFilter;
+    })
+    .filter(asset => {
+      // Lọc theo từ khóa tìm kiếm
+      const keyword = search.trim().toLowerCase();
+      if (!keyword) return true;
+      return (
+        asset.name?.toLowerCase().includes(keyword) ||
+        asset.code?.toLowerCase().includes(keyword) ||
+        asset.description?.toLowerCase().includes(keyword) ||
+        asset.assetType?.toLowerCase().includes(keyword) ||
+        asset.system?.name?.toLowerCase().includes(keyword)
+      );
+    });
 
   const fetchAssets = async () => {
     setLoading(true);
@@ -138,6 +154,7 @@ export default function AssetPage() {
     }
     setLoading(false);
   };
+
 
   const inputStyle = {
     borderRadius: 8,
@@ -299,6 +316,29 @@ export default function AssetPage() {
 
         <div style={{
           display: 'flex',
+          alignItems: 'center',
+          margin: '0 32px 12px 32px',
+          justifyContent: 'flex-start'
+        }}>
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo tên, mã, mô tả, loại, hệ thống..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              width: 350,
+              padding: '8px 14px',
+              borderRadius: 8,
+              border: '1px solid #e0e0e0',
+              fontSize: 15,
+              background: '#f7fafd'
+            }}
+          />
+        </div>
+
+
+        <div style={{
+          display: 'flex',
           gap: 8,
           marginBottom: 16,
           marginLeft: 32,
@@ -407,9 +447,12 @@ export default function AssetPage() {
                   <td>{asset.lossMagnitude ?? 1}</td>
                   <td>{asset.system?.name || ''}</td>
                   <td>
-                    {asset.createdAt
-                      ? moment(asset.createdAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
-                      : ''}
+                    {asset.updatedAt
+                      ? moment(asset.updatedAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
+                      : (asset.createdAt
+                        ? moment(asset.createdAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
+                        : '')
+                    }
                   </td>
                   <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <button

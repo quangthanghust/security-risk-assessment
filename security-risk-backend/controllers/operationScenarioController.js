@@ -1,4 +1,5 @@
 const operationScenarioService = require('../services/operationScenarioService');
+const StrategicScenario = require('../models/StrategicScenario');
 const mongoose = require('mongoose');
 
 
@@ -58,12 +59,18 @@ const updateOperationScenario = async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     return res.status(400).json({ message: 'Invalid ID' });
   }
+  if ('createdBy' in req.body) delete req.body.createdBy;
+
+  // Kiểm tra quyền trước khi update
+  const scenario = await operationScenarioService.getOperationScenarioById(req.params.id);
+  if (!scenario) return res.status(404).json({ message: 'Operation scenario not found' });
+  const createdById = scenario.createdBy._id ? scenario.createdBy._id.toString() : scenario.createdBy.toString();
+  if (req.user.role !== 'admin' && createdById !== req.user.userId) {
+    return res.status(403).json({ message: 'Bạn không có quyền sửa kịch bản này' });
+  }
+
   try {
     const updated = await operationScenarioService.updateOperationScenario(req.params.id, req.body);
-    if (!updated) return res.status(404).json({ message: 'Operation scenario not found' });
-    if (req.user.role !== 'admin' && updated.createdBy.toString() !== req.user.userId) {
-      return res.status(403).json({ message: 'Bạn không có quyền sửa kịch bản này' });
-    }
     res.json(updated);
   } catch (err) {
     res.status(400).json({ message: err.message });

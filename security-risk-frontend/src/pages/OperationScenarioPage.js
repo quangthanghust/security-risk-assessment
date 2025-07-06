@@ -39,6 +39,7 @@ export default function OperationScenarioPage() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [success, setSuccess] = useState('');
+  const [search, setSearch] = useState('');
 
   // Bước 1: Lấy dữ liệu liên kết
   const fetchData = async () => {
@@ -143,6 +144,23 @@ export default function OperationScenarioPage() {
     }));
   };
 
+  const filteredOperationScenarios = operationScenarios.filter(sc => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return true;
+    return (
+      sc.name?.toLowerCase().includes(keyword) ||
+      sc.description?.toLowerCase().includes(keyword) ||
+      strategicScenarios.find(ss => ss._id === (sc.strategicScenarioId?._id || sc.strategicScenarioId))?.name?.toLowerCase().includes(keyword) ||
+      assets.find(a =>
+        a._id === (
+          (strategicScenarios.find(ss => ss._id === (sc.strategicScenarioId?._id || sc.strategicScenarioId))?.asset?._id)
+          || (strategicScenarios.find(ss => ss._id === (sc.strategicScenarioId?._id || sc.strategicScenarioId))?.asset)
+        )
+      )?.name?.toLowerCase().includes(keyword) ||
+      threats.find(t => t._id === (sc.threat?._id || sc.threat))?.description?.toLowerCase().includes(keyword) ||
+      vulnerabilities.find(v => v._id === (sc.vulnerability?._id || sc.vulnerability))?.description?.toLowerCase().includes(keyword)
+    );
+  });
 
   // Bước 4: Dropdown liên kết
   return (
@@ -263,6 +281,29 @@ export default function OperationScenarioPage() {
             <button type="button" onClick={fetchData} style={{ background: '#19c6e6', color: '#fff', padding: '6px 16px', borderRadius: 8 }}>Làm mới danh sách</button>
           </div>
         </form>
+
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          margin: '0 32px 12px 32px',
+          justifyContent: 'flex-start'
+        }}>
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo tên, mô tả, kịch bản chiến lược, tài sản, mối đe dọa, lỗ hổng..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              width: 350,
+              padding: '8px 14px',
+              borderRadius: 8,
+              border: '1px solid #e0e0e0',
+              fontSize: 15,
+              background: '#f7fafd'
+            }}
+          />
+        </div>
+
         <div style={{
           margin: '0 32px 32px 32px',
           background: '#fff',
@@ -287,7 +328,7 @@ export default function OperationScenarioPage() {
               </tr>
             </thead>
             <tbody>
-              {operationScenarios.map(sc => (
+              {filteredOperationScenarios.map(sc => (
                 <tr key={sc._id}>
                   <td>{sc.name}</td>
                   <td>{sc.description}</td>

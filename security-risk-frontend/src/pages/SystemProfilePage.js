@@ -38,6 +38,7 @@ export default function SystemProfilePage() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [success, setSuccess] = useState('');
+  const [search, setSearch] = useState('');
 
   const fetchProfiles = async () => {
     setLoading(true);
@@ -114,6 +115,21 @@ export default function SystemProfilePage() {
     }
     setLoading(false);
   };
+
+  const filteredProfiles = profiles.filter(p => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return true;
+    return (
+      p.name?.toLowerCase().includes(keyword) ||
+      p.manager?.toLowerCase().includes(keyword) ||
+      p.contact?.toLowerCase().includes(keyword) ||
+      p.organizationUnit?.toLowerCase().includes(keyword) ||
+      p.purpose?.toLowerCase().includes(keyword) ||
+      p.scope?.toLowerCase().includes(keyword) ||
+      p.criticality?.toLowerCase().includes(keyword) ||
+      p.description?.toLowerCase().includes(keyword)
+    );
+  });
 
   return (
     <div
@@ -215,6 +231,28 @@ export default function SystemProfilePage() {
 
         <div style={{
           display: 'flex',
+          alignItems: 'center',
+          margin: '0 32px 12px 32px',
+          justifyContent: 'flex-start'
+        }}>
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo tên, quản lý, liên hệ, đơn vị, mục đích, mô tả..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              width: 350,
+              padding: '8px 14px',
+              borderRadius: 8,
+              border: '1px solid #e0e0e0',
+              fontSize: 15,
+              background: '#f7fafd'
+            }}
+          />
+        </div>
+
+        <div style={{
+          display: 'flex',
           gap: 8,
           marginBottom: 16,
           marginLeft: 32,
@@ -304,7 +342,7 @@ export default function SystemProfilePage() {
               </tr>
             </thead>
             <tbody>
-              {profiles.map(p => (
+              {filteredProfiles.map(p => (
                 <tr key={p._id}>
                   <td>{p.name}</td>
                   <td>{p.manager}</td>
@@ -315,9 +353,12 @@ export default function SystemProfilePage() {
                   <td>{p.criticality}</td>
                   <td>{p.description}</td>
                   <td>
-                    {p.createdAt
-                      ? moment(p.createdAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
-                      : ''}
+                    {p.updatedAt
+                      ? moment(p.updatedAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
+                      : (p.createdAt
+                        ? moment(p.createdAt).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
+                        : '')
+                    }
                   </td>
                   <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <button
